@@ -29,7 +29,7 @@ export class GalleryManager extends Gallery {
         message: `Page number should be greater than 0 and less than ${pagesAmount + 1}`,
       });
     }
-    const images = await apiService.getRandomImages(imageNumber);
+    const images = await apiService.getRandomImages(imageNumber, pageNumber);
     return createResponse(200, images);
   }
 }

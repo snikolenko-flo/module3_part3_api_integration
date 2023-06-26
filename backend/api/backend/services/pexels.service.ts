@@ -1,4 +1,4 @@
-import { createClient } from 'pexels';
+import { Photos, createClient } from 'pexels';
 import { ImagesIds } from '../interfaces/pexels';
 import { errorHandler } from '@helper/http-api/error-handler';
 import { ImageAPI } from '../interfaces/image.api';
@@ -11,13 +11,10 @@ const client = createClient(apiKey!);
 // and 20,000 requests per month.
 
 export class PexelsService extends ImageAPI {
-  async getRandomImages(imagesNumber: number): Promise<IResponseWithImages> {
+  async getRandomImages(imagesNumber: number, pageNumber: number): Promise<IResponseWithImages> {
     try {
-      const photos = await client.photos.curated({ per_page: imagesNumber });
-      const photosArray = JSON.stringify(photos);
-      const newPhotosArray = JSON.parse(photosArray);
-
-      const imageArray = newPhotosArray.photos.map((photo) => {
+      const photos = await client.photos.curated({ per_page: imagesNumber, page: pageNumber }) as Photos;
+      const imageArray = photos.photos.map((photo) => {
         return photo.src.medium;
       });
       return {

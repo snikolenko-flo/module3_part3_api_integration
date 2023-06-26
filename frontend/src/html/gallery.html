@@ -5,7 +5,12 @@
     <link rel="stylesheet" href='/frontend/build/css/gallery.css' />
   </head>
   <body>
-    <ul id="pages"></ul>
+    <div>
+      <a href="" id="next_page">next_page</a>
+    </div>
+    <div>
+      <a href="" id="previous_page">previous_page</a>
+    </div>
     <form id="image_form" action="/upload" method="post" enctype="multipart/form-data">
       <label for="img">Select image:</label>
       <input type="file" id="img" name="img" accept="image/*" required>

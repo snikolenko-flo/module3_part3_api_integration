@@ -11,8 +11,6 @@ export async function loadGallery(): Promise<void> {
     const pageLimit: number = await urlService.getLimit();
     const user: string = urlService.getUserFromUrl();
     const images = await manager.api.fetchImages(pageNumber, pageLimit, user);
-
-    manager.render.renderPagesList(images.total);
     manager.render.renderImages(images.objects);
     manager.url.addParametersToUrl(pageNumber, pageLimit, user);
   } catch (e) {
@@ -20,23 +18,42 @@ export async function loadGallery(): Promise<void> {
   }
 }
 
-export async function fetchGallery(event: Event): Promise<void> {
+export async function fetchNextPage(event: Event): Promise<void> {
   event.preventDefault();
-  const pageNumber = Number((event.target as HTMLElement).innerText);
-
-  const clickedPageNumber = manager.url.getClickedPageNumber(pageNumber);
-  if (!clickedPageNumber) return;
-
+  const pageNumber: number = urlService.getPageNumberFromUrl();
+  const clickedPageNumber = pageNumber + 1;
   const pageLimit: number = urlService.getPageLimitFromUrl();
   const user: string = urlService.getUserFromUrl();
-
   try {
     let images = await manager.api.fetchImages(clickedPageNumber, pageLimit);
     if(user) {
       images = await manager.api.fetchImages(clickedPageNumber, pageLimit, user);
-      manager.url.addParametersToUrl(pageNumber, pageLimit, user);
+      manager.url.addParametersToUrl(clickedPageNumber, pageLimit, user);
     } else {
-      manager.url.addParametersToUrl(pageNumber, pageLimit);
+      manager.url.addParametersToUrl(clickedPageNumber, pageLimit);
+    }
+    manager.render.renderImages(images.objects);
+  } catch (e) {
+    alert(e);
+  }
+}
+
+export async function fetchPreviousPage(event: Event): Promise<void> {
+  event.preventDefault();
+  const pageNumber: number = urlService.getPageNumberFromUrl();
+  let clickedPageNumber = pageNumber - 1;
+  if(clickedPageNumber === 0) {
+    clickedPageNumber = 1;
+  }
+  const pageLimit: number = urlService.getPageLimitFromUrl();
+  const user: string = urlService.getUserFromUrl();
+  try {
+    let images = await manager.api.fetchImages(clickedPageNumber, pageLimit);
+    if(user) {
+      images = await manager.api.fetchImages(clickedPageNumber, pageLimit, user);
+      manager.url.addParametersToUrl(clickedPageNumber, pageLimit, user);
+    } else {
+      manager.url.addParametersToUrl(clickedPageNumber, pageLimit);
     }
     manager.render.renderImages(images.objects);
   } catch (e) {

@@ -1,5 +1,5 @@
 import { IResponseWithImages } from './response';
 
 export abstract class ImageAPI {
-  abstract getRandomImages(imagesNumber: number): Promise<IResponseWithImages>;
+  abstract getRandomImages(pageimagesNumber: number, pageNumber: number): Promise<IResponseWithImages>;
 }

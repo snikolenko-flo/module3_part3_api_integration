@@ -12,17 +12,6 @@ export class GalleryService {
     return images;
   }
 
-  wrapNumbersInHtml(totalPages: number): string {
-    let pagesList = '';
-
-    for (let i = 1; i <= totalPages; i++) {
-      pagesList += `<a href="">
-                      <li>${i}</li>
-                    </a>`;
-    }
-    return pagesList;
-  }
-
   redirectToPage(pageNumber: number, pageLimit: number): void {
     window.location.href = `gallery.html?page=${pageNumber}&limit=${pageLimit}`;
   }
