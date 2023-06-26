@@ -5,9 +5,12 @@ import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { GalleryManager } from './gallery.manager';
 import jwt from 'jsonwebtoken';
 import { DynamoDB } from '../services/dynamo.service';
+import { PexelsService } from '../services/pexels.service';
 
 const secret = process.env.SECRET;
 const dbService = new DynamoDB();
+const apiService = new PexelsService();
+const imageNumber = 10;
 
 export const getGallery: APIGatewayProxyHandlerV2 = async (event) => {
   try {
@@ -25,7 +28,7 @@ export const getGallery: APIGatewayProxyHandlerV2 = async (event) => {
     if (isNaN(pageNumber)) return createResponse(400, { message: 'The page number should be an integer' });
     if (!isFinite(pageNumber)) return createResponse(400, { message: 'The page number should be a finite integer' });
 
-    return await manager.getGallery(user!, pageNumber, pageLimit, dbService, currentUser);
+    return await manager.getGallery(apiService, user!, pageNumber, pageLimit, dbService, currentUser, imageNumber);
   } catch (e) {
     return errorHandler(e);
   }

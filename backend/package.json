@@ -115,6 +115,7 @@
     "jsonwebtoken": "^9.0.0",
     "nodemailer": "^6.7.2",
     "parse-multipart": "^1.0.4",
+    "pexels": "^1.4.0",
     "piexifjs": "^1.0.6",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.12.2",
