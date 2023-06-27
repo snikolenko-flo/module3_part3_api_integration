@@ -25,4 +25,19 @@ export class PexelsService extends ImageAPI {
       throw errorHandler(e);
     }
   }
+
+  async searchImages(query: string, imagesNumber: number, pageNumber: number): Promise<IResponseWithImages> {
+      try {
+      const photos = await client.photos.search({ query, per_page: imagesNumber, page: pageNumber }) as Photos;
+      const imageArray = photos.photos.map((photo) => {
+          return photo.src.medium;
+      });
+      return {
+        total: 1,
+        objects: imageArray,
+      };
+      } catch (e) {
+        throw errorHandler(e);
+      }
+    };
 }

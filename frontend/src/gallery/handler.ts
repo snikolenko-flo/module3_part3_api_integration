@@ -1,6 +1,7 @@
 import { GalleryManager } from './gallery.manager.js';
 import { UrlManipulationService } from '../services/url-manipulation.service.js';
 import { BASE_URL } from '../data/constants.js';
+import { ImagesResponse } from '../interfaces/response.js';
 
 const urlService = new UrlManipulationService();
 const manager = new GalleryManager();
@@ -21,16 +22,34 @@ export async function loadGallery(): Promise<void> {
 export async function fetchNextPage(event: Event): Promise<void> {
   event.preventDefault();
   const pageNumber: number = urlService.getPageNumberFromUrl();
-  const clickedPageNumber = pageNumber + 1;
+  const increasedPageNumber = pageNumber + 1;
   const pageLimit: number = urlService.getPageLimitFromUrl();
   const user: string = urlService.getUserFromUrl();
+  const query = localStorage.getItem('query');
+  const accessToken = localStorage.getItem('token');
+
+  const body = {
+    query: query,
+    pageNumber: increasedPageNumber,
+    pageLimit: pageLimit,
+    user: user
+  }
+
+  const options = {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      Authorization: accessToken,
+    },
+  };
+  const url = `${BASE_URL}/search`;
   try {
-    let images = await manager.api.fetchImages(clickedPageNumber, pageLimit);
+    const response = await fetch(url, options);
+    const images = (await response.json()) as ImagesResponse;
     if(user) {
-      images = await manager.api.fetchImages(clickedPageNumber, pageLimit, user);
-      manager.url.addParametersToUrl(clickedPageNumber, pageLimit, user);
+      manager.url.addParametersToUrl(increasedPageNumber, pageLimit, user);
     } else {
-      manager.url.addParametersToUrl(clickedPageNumber, pageLimit);
+      manager.url.addParametersToUrl(increasedPageNumber, pageLimit);
     }
     manager.render.renderImages(images.objects);
   } catch (e) {
@@ -41,19 +60,37 @@ export async function fetchNextPage(event: Event): Promise<void> {
 export async function fetchPreviousPage(event: Event): Promise<void> {
   event.preventDefault();
   const pageNumber: number = urlService.getPageNumberFromUrl();
-  let clickedPageNumber = pageNumber - 1;
-  if(clickedPageNumber === 0) {
-    clickedPageNumber = 1;
+  let decreasedPageNumber = pageNumber - 1;
+  if(decreasedPageNumber === 0) {
+    decreasedPageNumber = 1;
   }
   const pageLimit: number = urlService.getPageLimitFromUrl();
   const user: string = urlService.getUserFromUrl();
+  const query = localStorage.getItem('query');
+  const accessToken = localStorage.getItem('token');
+
+  const body = {
+    query: query,
+    pageNumber: decreasedPageNumber,
+    pageLimit: pageLimit,
+    user: user
+  }
+
+  const options = {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      Authorization: accessToken,
+    },
+  };
+  const url = `${BASE_URL}/search`;
   try {
-    let images = await manager.api.fetchImages(clickedPageNumber, pageLimit);
+    const response = await fetch(url, options);
+    const images = (await response.json()) as ImagesResponse;
     if(user) {
-      images = await manager.api.fetchImages(clickedPageNumber, pageLimit, user);
-      manager.url.addParametersToUrl(clickedPageNumber, pageLimit, user);
+      manager.url.addParametersToUrl(decreasedPageNumber, pageLimit, user);
     } else {
-      manager.url.addParametersToUrl(clickedPageNumber, pageLimit);
+      manager.url.addParametersToUrl(decreasedPageNumber, pageLimit);
     }
     manager.render.renderImages(images.objects);
   } catch (e) {
@@ -95,6 +132,47 @@ export async function uploadImage(event: Event): Promise<void> {
       manager.url.addParametersToUrl(pageNumber, pageLimit+limitStep);
     }
     location.reload();
+  } catch (e) {
+    alert(e);
+  }
+}
+
+export async function searchImages(event: Event): Promise<void> {
+  event.preventDefault();
+  const apiSearchForm = document.getElementById('api_search') as HTMLFormElement;
+  const query = apiSearchForm.value;
+  localStorage.setItem('query', query);
+
+  const pageNumber = 1;
+  const pageLimit: number = urlService.getPageLimitFromUrl();
+  const user: string = urlService.getUserFromUrl();
+
+  const url = `${BASE_URL}/search`;
+  const accessToken = localStorage.getItem('token');
+
+  const body = {
+    query: query,
+    pageNumber: pageNumber,
+    pageLimit: pageLimit,
+    user: user
+  }
+
+  const options = {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      Authorization: accessToken,
+    },
+  };
+  try {
+    const response = await fetch(url, options);
+    const images = (await response.json()) as ImagesResponse;
+    if(user) {
+      manager.url.addParametersToUrl(pageNumber, pageLimit, user);
+    } else {
+      manager.url.addParametersToUrl(pageNumber, pageLimit);
+    }
+    manager.render.renderImages(images.objects);
   } catch (e) {
     alert(e);
   }

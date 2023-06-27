@@ -35,5 +35,18 @@ export const getGalleryConfig: AWSPartitial = {
         },
       ],
     },
+    apiSearchImages: {
+      handler: 'api/backend/gallery/handler.searchImagesInAPI',
+      description: 'Return a number of images that are on a backend',
+      timeout: 28,
+      events: [
+        {
+          httpApi: {
+            path: '/search',
+            method: 'post',
+          },
+        },
+      ],
+    },
   },
 };

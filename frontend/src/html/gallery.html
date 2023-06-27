@@ -5,17 +5,24 @@
     <link rel="stylesheet" href='/frontend/build/css/gallery.css' />
   </head>
   <body>
-    <div>
-      <a href="" id="next_page">next_page</a>
-    </div>
-    <div>
-      <a href="" id="previous_page">previous_page</a>
-    </div>
+    <p>
+      <button id="previous_page" type="button">previous</button>
+      <button id="next_page" type="button">next page</button>
+    </p>
+    <p>
+    <form id="search_form" action="/search" method="post">
+      <label for="search">Search new images:</label>
+      <input type="search" id="api_search">
+      <input type="submit">
+    </form>
+    </p>
+    <p>
     <form id="image_form" action="/upload" method="post" enctype="multipart/form-data">
       <label for="img">Select image:</label>
       <input type="file" id="img" name="img" accept="image/*" required>
       <input type="submit">
     </form>
+    </p>
     <div id="images"></div>
     <script type="module" src='/frontend/build/gallery/gallery.js'></script>
   </body>

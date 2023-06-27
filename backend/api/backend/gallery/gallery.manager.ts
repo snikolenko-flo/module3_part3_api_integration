@@ -22,14 +22,21 @@ export class GalleryManager extends Gallery {
     currentUser: string,
     imageNumber: number
   ): Promise<APIGatewayProxyResult> {
-    const pagesAmount = await this.service.getNumberOfPages(pageLimit, dbService, user);
-    const isValid = this.service.isPagesAmountValid(pagesAmount, pageNumber);
-    if (!isValid) {
-      return createResponse(400, {
-        message: `Page number should be greater than 0 and less than ${pagesAmount + 1}`,
-      });
-    }
     const images = await apiService.getRandomImages(imageNumber, pageNumber);
+    return createResponse(200, images);
+  }
+
+  async searchGallery(
+    apiService: ImageAPI,
+    user: string,
+    pageNumber: number,
+    pageLimit: number,
+    dbService: Database,
+    currentUser: string,
+    imageNumber: number,
+    query: string,
+  ): Promise<APIGatewayProxyResult> {
+    const images = await apiService.searchImages(query, imageNumber, pageNumber);
     return createResponse(200, images);
   }
 }

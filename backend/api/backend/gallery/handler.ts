@@ -48,3 +48,31 @@ export const getImagesLimit: APIGatewayProxyHandlerV2 = async (event) => {
     return errorHandler(e);
   }
 };
+
+export const searchImagesInAPI: APIGatewayProxyHandlerV2 = async (event) => {
+  try {    
+    console.log('searchImagesInAPI');
+    const { query, pageNumber, pageLimit, user } = JSON.parse(event.body!);
+    const manager = new GalleryManager();
+
+    console.log(`query: ${query}`);
+    console.log(`pageNumber: ${pageNumber}`);
+    console.log(`pageLimit: ${pageLimit}`);
+    console.log(`user: ${user}`);
+
+    const token = event['headers'].authorization;
+    const decodedToken = jwt.verify(token, secret);
+    const currentUser = decodedToken.user;
+
+    if (isNaN(pageNumber)) return createResponse(400, { message: 'The page number should be an integer' });
+    if (!isFinite(pageNumber)) return createResponse(400, { message: 'The page number should be a finite integer' });
+
+    if(query === '') {
+      return await manager.getGallery(apiService, user!, pageNumber, pageLimit, dbService, currentUser, imageNumber);
+    } else {
+      return await manager.searchGallery(apiService, user!, pageNumber, pageLimit, dbService, currentUser, imageNumber, query);
+    }
+  } catch (e) {
+    return errorHandler(e);
+  }
+};
