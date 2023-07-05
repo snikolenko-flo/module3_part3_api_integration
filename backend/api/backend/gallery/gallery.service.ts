@@ -45,18 +45,11 @@ export class GalleryService {
   async getImages(
     pageNumber: number,
     pageLimit: number,
-    pagesAmount: number,
     dbService: Database,
     currentUser: string,
     user?: string
   ): Promise<IResponseWithImages> {
-    if (user) {
-      log(`Get images for the user ${user}.`);
-      return await dbService.getImagesForUser(pageNumber, pageLimit, pagesAmount, user);
-    } else {
-      log('Get all images.');
-      return await dbService.getImagesForOnePage(pageNumber, pageLimit, pagesAmount, currentUser);
-    }
+    return await dbService.getImagesForUser(pageNumber, pageLimit, user);
   }
 
   async getNumberOfPages(limit: number, dbService: Database, user?: string): Promise<number> {

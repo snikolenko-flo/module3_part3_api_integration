@@ -17,7 +17,6 @@ export abstract class Database {
   abstract getImagesForUser(
     page: number,
     limit: number,
-    pagesAmount: number,
     userEmail?: string
   ): Promise<IResponseWithImages>;
   abstract getImagesArray(userEmail: string): Promise<ImagesArray>;

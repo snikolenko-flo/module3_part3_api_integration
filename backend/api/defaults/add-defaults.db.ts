@@ -7,5 +7,5 @@ const dbService: Database = new DynamoDB();
 
 (async () => {
   await dbService.addDefaultUsersToDB(defaultUsersArray);
-  await dbService.addImagesDataToDB(imagesDir);
+ // await dbService.addImagesDataToDB(imagesDir);
 })();

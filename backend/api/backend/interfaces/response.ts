@@ -1,4 +1,9 @@
 export interface IResponseWithImages {
   total: number;
-  objects: string[];
+  objects: { url: string; id: number }[];
+}
+
+export interface ImagesUrls {
+  url: string; 
+  id: number;
 }

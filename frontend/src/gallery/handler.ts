@@ -12,6 +12,8 @@ export async function loadGallery(): Promise<void> {
     const pageLimit: number = await urlService.getLimit();
     const user: string = urlService.getUserFromUrl();
     const images = await manager.api.fetchImages(pageNumber, pageLimit, user);
+    console.log('images');
+    console.log(images);
     manager.render.renderImages(images.objects);
     manager.url.addParametersToUrl(pageNumber, pageLimit, user);
   } catch (e) {
@@ -175,5 +177,34 @@ export async function searchImages(event: Event): Promise<void> {
     manager.render.renderImages(images.objects);
   } catch (e) {
     alert(e);
+  }
+}
+
+export async function addImageToFavorites(event: Event): Promise<void> {
+  event.preventDefault();
+  console.log('add to favorites');
+  const checkedImages = Array.from(document.querySelectorAll('input[name="image"]:checked')).map(function(item) {return item.id});
+  const accessToken = localStorage.getItem('token');
+  
+  const body = {
+    imagesIds: checkedImages
+  }
+
+  const options = {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      Authorization: accessToken,
+    },
+  };
+
+  const url = `${BASE_URL}/add_to_favorites`;
+  try {
+    const response = await fetch(url, options);
+    if(response.ok) {
+      alert('Images were added to favorites');
+    }
+  } catch (e) {
+    alert(`addImageToFavorites. The error: ${e}`);
   }
 }

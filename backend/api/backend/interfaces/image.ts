@@ -1,4 +1,5 @@
 export interface DynamoImages extends Array<any> {
+  id: number;
   filename: string;
   user: string;
   url: string;
@@ -7,6 +8,7 @@ export interface DynamoImages extends Array<any> {
 }
 
 export interface ImageObject {
+  id: number;
   filename: string;
   user: string;
   metadata: object;

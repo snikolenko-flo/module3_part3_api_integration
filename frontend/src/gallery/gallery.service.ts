@@ -1,12 +1,11 @@
-import { FRONTEND_BASE_URL } from '../data/constants.js';
-
 export class GalleryService {
-  wrapUrlsInHtml(urlsList: URL[]): string {
+  wrapUrlsInHtml(urlsList: {url: string, id: number}[]): string {
     let images = '';
 
-    urlsList.forEach(function (url) {
+    urlsList.forEach(function (image) {
       images += `<div class="gallery">
-                   <img src="${url}">
+                   <img src="${image.url}">
+                   <input type="checkbox" id="${image.id}" name="image">
                  </div>`;
     });
     return images;

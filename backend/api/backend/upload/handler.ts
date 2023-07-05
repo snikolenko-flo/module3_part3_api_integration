@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import { UploadManager } from './upload.manager';
 import { FileService } from '../services/file.service';
 import { DynamoDB } from '../services/dynamo.service';
+import { v4 as uuidv4 } from 'uuid';
 
 const secret = process.env.SECRET;
 const s3ImageDirectory = process.env.S3_IMAGE_DIRECTORY;
@@ -27,6 +28,7 @@ export const upload: APIGatewayProxyHandlerV2 = async (event) => {
     const imageArray = await manager.getImagesArray(userEmail, dbService);
 
     imageArray.push({
+      id: uuidv4(),
       filename: filename,
       user: user,
       metadata: imageMetadata,

@@ -14,6 +14,8 @@ import * as crypto from 'crypto';
 import { opendir, readFile } from 'fs/promises';
 import { FileService } from './file.service';
 import { uploadToS3 } from './s3.service';
+import { ImagesUrls } from '../interfaces/response';
+import { v4 as uuidv4 } from 'uuid';
 
 const dynamoTable = process.env.DYNAMO_TABLE;
 const awsRegion = process.env.AWS_REGION;
@@ -87,6 +89,7 @@ export class DynamoDB extends Database {
     const imageMetadata = this.file.getMetadata(buffer, this.imagesType);
     await uploadToS3(buffer, `${this.adminEmail}/${fileName}`, this.s3ImagesDirectory);
     return {
+      id: uuidv4(),
       filename: fileName,
       user: this.adminEmail,
       metadata: imageMetadata,
@@ -221,10 +224,10 @@ export class DynamoDB extends Database {
 
   async getNumberOfAllImages(user: string): Promise<number> {
     try {
-      const commonImages = await this.getCommonImages();
+     // const commonImages = await this.getCommonImages();
       const userImages = await this.getImagesForUserOnly(user);
-      const imagesArray = commonImages.concat(userImages);
-      return Number(imagesArray.length);
+      //const imagesArray = commonImages.concat(userImages);
+      return Number(userImages.length);
     } catch (e) {
       throw Error(`Error: ${e} function: getNumberOfAllImages.`);
     }
@@ -385,11 +388,13 @@ export class DynamoDB extends Database {
     }
   }
 
-  private async createSingedUlrs(images: ImagesArray): Promise<string[]> {
+  private async createSingedUlrs(images: ImagesArray): Promise<ImagesUrls[]> {
     try {
       return await Promise.all(
         images.map(async (item) => {
-          return await this.createSignedUrl(`${item.user}/${item.filename}`);
+          // return await this.createSignedUrl(`${item.user}/${item.filename}`);
+          const imageUrl = await this.createSignedUrl(`${item.user}/${item.filename}`);
+          return { url: imageUrl, id: item.id }
         })
       );
     } catch (e) {
@@ -400,7 +405,6 @@ export class DynamoDB extends Database {
   async getImagesForUser(
     page: number,
     limit: number,
-    pagesAmount: number,
     userEmail?: string
   ): Promise<IResponseWithImages> {
     try {
@@ -408,9 +412,10 @@ export class DynamoDB extends Database {
       const sortedImages = this.sortImagesFromOldToNew(images);
       const paths = this.getImagesPerPage(sortedImages, page, PER_PAGE);
       const signedImageUrls = await this.createSingedUlrs(paths);
-
+      const defaultImagesAmount = 1;
+      
       return {
-        total: pagesAmount,
+        total: defaultImagesAmount,
         objects: signedImageUrls,
       };
     } catch (e) {
