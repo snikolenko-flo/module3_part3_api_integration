@@ -155,6 +155,9 @@ export class DynamoDB extends Database {
   }
 
   async updateUserInDB(userEmail: string, arrayOfImages: ImagesArray): Promise<void> {
+    console.log(`Update user ${userEmail} with the array: `);
+    console.log(arrayOfImages);
+
     const params = {
       TableName: this.table,
       Key: {
@@ -168,13 +171,15 @@ export class DynamoDB extends Database {
     const client = new DynamoDBClient({});
     try {
       const command = new UpdateItemCommand(params);
-      client.send(command);
+      await client.send(command);
+      console.log(`User ${userEmail} was updated.`);
     } catch (e) {
       throw Error(`Error: ${e} function: updateUserInDB.`);
     }
   }
 
   async findUser(email: string): Promise<IUser> {
+    console.log(`Find user ${email} in the table ${this.table}, aws region is ${awsRegion}`);
     const params = {
       TableName: this.table,
       KeyConditionExpression: 'Email = :pk',
@@ -184,11 +189,10 @@ export class DynamoDB extends Database {
     };
 
     const queryCommand = new QueryCommand(params);
-
+    
     try {
       const data = await this.client.send(queryCommand);
       const user = data.Items![0];
-
       return {
         email: user.Email.S!,
         password: user.Password.S!,
@@ -224,9 +228,7 @@ export class DynamoDB extends Database {
 
   async getNumberOfAllImages(user: string): Promise<number> {
     try {
-     // const commonImages = await this.getCommonImages();
       const userImages = await this.getImagesForUserOnly(user);
-      //const imagesArray = commonImages.concat(userImages);
       return Number(userImages.length);
     } catch (e) {
       throw Error(`Error: ${e} function: getNumberOfAllImages.`);
@@ -392,7 +394,6 @@ export class DynamoDB extends Database {
     try {
       return await Promise.all(
         images.map(async (item) => {
-          // return await this.createSignedUrl(`${item.user}/${item.filename}`);
           const imageUrl = await this.createSignedUrl(`${item.user}/${item.filename}`);
           return { url: imageUrl, id: item.id }
         })

@@ -28,8 +28,6 @@ export class GalleryManager extends Gallery {
     let images;
     if(user) {
       images = await this.service.getImages(pageNumber, pageLimit, dbService, currentUser, user);
-      console.log('images');
-      console.log(images);
     } else {
       images = await apiService.getRandomImages(imageNumber, pageNumber);
     }

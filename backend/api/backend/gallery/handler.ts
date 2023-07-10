@@ -16,6 +16,8 @@ const s3ImageDirectory = process.env.S3_IMAGE_DIRECTORY;
 
 export const getGallery: APIGatewayProxyHandlerV2 = async (event) => {
   try {
+    log('getGallery event');
+    log(event);
     const manager = new GalleryManager();
 
     const params = event.queryStringParameters;
@@ -107,7 +109,18 @@ export const addImagesToFavorites: APIGatewayProxyHandlerV2 = async (event) => {
     const dbService = new DynamoDB();
 
     await manager.downloadAndUploadFiles(favoriteImages, s3ImageDirectory!, user);
-    manager.updateDbUser(favoriteImages, userEmail, dbService);
+    await manager.updateDbUser(favoriteImages, userEmail, dbService);
+    return createResponse(200);
+  } catch (e) {
+    return errorHandler(e);
+  }
+};
+
+export const cropImage: APIGatewayProxyHandlerV2 = async (event) => {
+  try {
+    console.log('cropImage');
+    console.log('event');
+    console.log(event);
     return createResponse(200);
   } catch (e) {
     return errorHandler(e);

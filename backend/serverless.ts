@@ -20,7 +20,9 @@ const masterConfig: AWS = {
       REGION: 'ap-northeast-1',
       CLIENT: 'FLO',
     },
-    dev: {},
+    dev: {
+      PROFILE: 'snik',
+    },
     prod: {},
     local: {
       PROFILE: 'snik',
@@ -51,8 +53,8 @@ const masterConfig: AWS = {
       authorizers: {
         apiAuthorizer: {
           type: 'request',
-          name: 'apiAuthorizer',
           enableSimpleResponses: true,
+          functionName: 'apiAuthorizer',
           //issuerUrl: '',
           //audience: '',
           identitySource: '$request.header.Authorization',
@@ -88,7 +90,7 @@ const masterConfig: AWS = {
     envFiles: ['env.yml'],
     envEncryptionKeyId: {
       local: '${file(./kms_key.yml):local}',
-      // dev: '${file(./kms_key.yml):dev}',
+      dev: '${file(./kms_key.yml):dev}',
       // test: '${file(./kms_key.yml):test}',
       // prod: '${file(./kms_key.yml):prod}',
     },

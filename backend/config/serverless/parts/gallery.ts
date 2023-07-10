@@ -61,5 +61,18 @@ export const getGalleryConfig: AWSPartitial = {
         },
       ],
     },
+    cropImage: {
+      handler: 'api/backend/gallery/handler.cropImage',
+      description: 'Crop image from s3',
+      timeout: 28,
+      events: [
+        {
+          s3: {
+            bucket: 'stanislav-flo-test-bucket',
+            event: 's3:ObjectCreated:*',
+          },
+        },
+      ],
+    },
   },
 };
