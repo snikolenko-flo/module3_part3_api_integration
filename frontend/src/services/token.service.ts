@@ -10,9 +10,13 @@ export class TokenService {
     this.redirect = new RedirectService();
   }
 
-  checkToken(): void {
+  checkToken(): Boolean {
     this.checkExpireTime();
-    this.checkTokenExists();
+    if (!this.checkTokenExists()) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   setToken(token: string): void {
@@ -25,8 +29,14 @@ export class TokenService {
     this.reSetExpireTimer(timeLeft);
   }
 
-  checkTokenExists(): void {
-    if (!this.tokenExists()) this.redirect.redirectToLogin();
+  checkTokenExists(): Boolean {
+    if (!this.tokenExists()) {
+        alert('Token is expired. Please relogin.');
+        this.redirect.redirectToLogin();
+        return false;
+    } else {
+      return true;
+    }
   }
 
   saveToken(token: string): void {

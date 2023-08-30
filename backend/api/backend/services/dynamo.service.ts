@@ -17,8 +17,9 @@ import { uploadToS3 } from './s3.service';
 import { ImagesUrls } from '../interfaces/response';
 import { v4 as uuidv4 } from 'uuid';
 
-const dynamoTable = process.env.DYNAMO_TABLE;
-const awsRegion = process.env.AWS_REGION;
+const dynamoTable = process.env.DYNAMO_TABLE ? process.env.DYNAMO_TABLE : 'module3_part2' ;
+const awsRegion = process.env.AWS_REGION ? process.env.AWS_REGION : 'ap-northeast-1';
+
 const dynamoClient = new DynamoDBClient({ region: awsRegion });
 const fileService = new FileService();
 
@@ -40,7 +41,7 @@ export class DynamoDB extends Database {
     this.defaultLimit = 60;
     this.defaultLimit = 60;
     this.userSortValue = 'default';
-    this.client = dynamoClient;
+    this.client = dynamoClient ? dynamoClient : new DynamoDBClient({ region: 'ap-northeast-1' });
     this.table = dynamoTable ? dynamoTable : 'module3_part2';
     this.adminEmail = 'admin@flo.team';
     this.s3ImagesDirectory = 's3-bucket';
@@ -94,6 +95,7 @@ export class DynamoDB extends Database {
       user: this.adminEmail,
       metadata: imageMetadata,
       date: new Date(),
+      subclipCreated: false,
     };
   }
 
@@ -189,7 +191,7 @@ export class DynamoDB extends Database {
     };
 
     const queryCommand = new QueryCommand(params);
-    
+
     try {
       const data = await this.client.send(queryCommand);
       const user = data.Items![0];
@@ -395,7 +397,7 @@ export class DynamoDB extends Database {
       return await Promise.all(
         images.map(async (item) => {
           const imageUrl = await this.createSignedUrl(`${item.user}/${item.filename}`);
-          return { url: imageUrl, id: item.id }
+          return { url: imageUrl, id: item.id };
         })
       );
     } catch (e) {
@@ -403,18 +405,14 @@ export class DynamoDB extends Database {
     }
   }
 
-  async getImagesForUser(
-    page: number,
-    limit: number,
-    userEmail?: string
-  ): Promise<IResponseWithImages> {
+  async getImagesForUser(page: number, limit: number, userEmail?: string): Promise<IResponseWithImages> {
     try {
       const images = await this.getImagesForUserOnly(userEmail!, limit);
       const sortedImages = this.sortImagesFromOldToNew(images);
       const paths = this.getImagesPerPage(sortedImages, page, PER_PAGE);
       const signedImageUrls = await this.createSingedUlrs(paths);
       const defaultImagesAmount = 1;
-      
+
       return {
         total: defaultImagesAmount,
         objects: signedImageUrls,

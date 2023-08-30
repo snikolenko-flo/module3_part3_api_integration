@@ -6,8 +6,8 @@ import { FileService } from '../services/file.service';
 import { Database } from '../interfaces/database';
 
 export class UploadManager {
-  uploadImageToS3(data: Buffer, filename: string, bucket: string): void {
-    uploadToS3(data, filename, bucket);
+  async uploadImageToS3(data: Buffer, filename: string, bucket: string): Promise<void> {
+    return await uploadToS3(data, filename, bucket);
   }
 
   async getImagesArray(userEmail: string, dbService: Database): Promise<ImagesArray> {

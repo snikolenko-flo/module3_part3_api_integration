@@ -4,6 +4,6 @@ export interface IResponseWithImages {
 }
 
 export interface ImagesUrls {
-  url: string; 
+  url: string;
   id: number;
 }

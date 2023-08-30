@@ -7,6 +7,8 @@ export class FileService {
     if (type === 'image/jpeg') {
       metadata = load(buffer.toString('binary'));
     }
+    console.log('FileService class | getMetadata() function | metadata:');
+    console.log(metadata);
     return metadata;
   };
   async isDirectory(filePath: string): Promise<boolean> {

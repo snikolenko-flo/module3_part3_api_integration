@@ -26,7 +26,7 @@ export class GalleryManager extends Gallery {
     imageNumber: number
   ): Promise<APIGatewayProxyResult> {
     let images;
-    if(user) {
+    if (user) {
       images = await this.service.getImages(pageNumber, pageLimit, dbService, currentUser, user);
     } else {
       images = await apiService.getRandomImages(imageNumber, pageNumber);
@@ -51,16 +51,16 @@ export class GalleryManager extends Gallery {
   async updateDbUser(favoriteImages: Photo[], userEmail: string, dbService: Database): Promise<void> {
     try {
       const imagesArray = await dbService.getImagesArray(userEmail);
-      const user = userEmail.split('@')[0];
 
       favoriteImages.forEach((image) => {
         const filename = image.src.original.split('/').slice(-1);
         imagesArray.push({
           id: image.id,
           filename: filename.toString(),
-          user: user,
+          user: userEmail,
           metadata: image,
           date: new Date(),
+          subclipCreated: false,
         });
       });
       await dbService.updateUserInDB(userEmail, imagesArray);
@@ -69,31 +69,44 @@ export class GalleryManager extends Gallery {
       throw Error(`Error: ${e} function: getImagesArray.`);
     }
   }
-  
-  async downloadAndUploadFiles(images: Photo[], s3Path: string, user: string): Promise<void> {
+
+  async updateSubclipField(userEmail: string, filename: string, dbService: Database): Promise<void> {
+    try {
+      const imagesArray = await dbService.getImagesArray(userEmail);
+      const imageToUpdate = imagesArray.find((image) => image.filename === filename);
+      imageToUpdate!.subclipCreated = true;
+      await dbService.updateUserInDB(userEmail, imagesArray);
+      console.log(`Subclip field for the file ${filename} was set to true`);
+    } catch (e) {
+      throw Error(`Error: ${e} function: getImagesArray.`);
+    }
+  }
+
+  async downloadAndUploadFiles(images: Photo[], s3Path: string, userEmail: string): Promise<void> {
     try {
       await Promise.all(
         images.map(async (image) => {
           const url = image.src.original;
           const filename = image.src.original.split('/').slice(-1);
           const fileData = await this.downloadFile(url);
-          await uploadToS3(fileData, `${user}/${filename}`, s3Path);
-        }));
+          await uploadToS3(fileData, `s3-bucket/${userEmail}/${filename}`, s3Path);
+        })
+      );
     } catch (e) {
       throw Error(`Error: ${e} function: downloadAndUploadFiles.`);
     }
   }
 
-  private downloadFile(url: string): Promise<Buffer> {
+  downloadFile(url: string): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       https
         .get(url, (response) => {
           const chunks: any = [];
-  
+
           response.on('data', (chunk) => {
             chunks.push(chunk);
           });
-  
+
           response.on('end', () => {
             console.log(`File from ${url} is downloaded.`);
             const fileData = Buffer.concat(chunks);
@@ -104,5 +117,22 @@ export class GalleryManager extends Gallery {
           reject(error);
         });
     });
+  }
+
+  retrievePartsFromKey(s3Key) {
+    const keyArray = s3Key.split('/');
+    const fullFileName = keyArray[keyArray.length - 1];
+    const userEmail = keyArray[keyArray.length - 2];
+    const fileNameArray = keyArray[keyArray.length - 1].split('.');
+    const fileNameWithoutExtension = fileNameArray[0];
+    const fileExtension = fileNameArray[fileNameArray.length - 1];
+    const s3PathBeforeUserFolder = keyArray.slice(0, -2);
+    return {
+      fullFileName,
+      userEmail,
+      fileNameWithoutExtension,
+      fileExtension,
+      s3PathBeforeUserFolder,
+    };
   }
 }

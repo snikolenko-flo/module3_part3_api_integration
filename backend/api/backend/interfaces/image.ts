@@ -13,6 +13,7 @@ export interface ImageObject {
   user: string;
   metadata: object;
   date: Date;
+  subclipCreated: boolean;
 }
 
 export interface ImagesArray extends Array<ImageObject> {}

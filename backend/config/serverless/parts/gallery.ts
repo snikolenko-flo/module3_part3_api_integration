@@ -51,7 +51,7 @@ export const getGalleryConfig: AWSPartitial = {
     apiAddToFavorites: {
       handler: 'api/backend/gallery/handler.addImagesToFavorites',
       description: 'Uploads images to s3',
-      timeout: 900,
+      timeout: 28,
       events: [
         {
           httpApi: {

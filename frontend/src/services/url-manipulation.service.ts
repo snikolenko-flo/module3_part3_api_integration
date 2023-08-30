@@ -28,10 +28,8 @@ export class UrlManipulationService {
 
   getUserFromUrl(): string {
     const currentUrl: string = window.location.search;
-
     const searchParams: URLSearchParams = new URLSearchParams(currentUrl);
     const user: string = searchParams.get('filter');
-
     return user;
   }
 
