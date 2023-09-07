@@ -6,7 +6,7 @@ import { GalleryManager } from './gallery.manager';
 import jwt from 'jsonwebtoken';
 import { DynamoDB } from '../services/dynamo.service';
 import { PexelsService } from '../services/pexels.service';
-import { Photo } from 'pexels';
+import { Image } from '../interfaces/image';
 import Jimp from 'jimp';
 import { downloadFromS3, uploadToS3 } from '../services/s3.service';
 import JPEG from 'jpeg-js';
@@ -83,16 +83,7 @@ export const searchImagesInAPI: APIGatewayProxyHandlerV2 = async (event) => {
     if (query === '') {
       return await manager.getGallery(apiService, user!, pageNumber, pageLimit, dbService, currentUser, imageNumber);
     } else {
-      return await manager.searchGallery(
-        apiService,
-        user!,
-        pageNumber,
-        pageLimit,
-        dbService,
-        currentUser,
-        imageNumber,
-        query
-      );
+      return await manager.searchGallery(apiService, pageNumber, imageNumber, query);
     }
   } catch (e) {
     return errorHandler(e);
@@ -111,7 +102,7 @@ export const addImagesToFavorites: APIGatewayProxyHandlerV2 = async (event) => {
     const decodedToken = jwt.verify(token, secret);
     const userEmail = decodedToken.user;
 
-    const favoriteImages: Photo[] = await apiService.getFavoriteImages(imagesIds);
+    const favoriteImages: Image[] = await apiService.getFavoriteImages(imagesIds);
     const dbService = new DynamoDB();
 
     await manager.downloadAndUploadFiles(favoriteImages, s3Bucket!, userEmail);

@@ -17,7 +17,7 @@ import { uploadToS3 } from './s3.service';
 import { ImagesUrls } from '../interfaces/response';
 import { v4 as uuidv4 } from 'uuid';
 
-const dynamoTable = process.env.DYNAMO_TABLE ? process.env.DYNAMO_TABLE : 'module3_part2' ;
+const dynamoTable = process.env.DYNAMO_TABLE ? process.env.DYNAMO_TABLE : 'module3_part2';
 const awsRegion = process.env.AWS_REGION ? process.env.AWS_REGION : 'ap-northeast-1';
 
 const dynamoClient = new DynamoDBClient({ region: awsRegion });

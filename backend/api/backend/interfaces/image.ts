@@ -16,4 +16,9 @@ export interface ImageObject {
   subclipCreated: boolean;
 }
 
+export interface Image {
+  id: number;
+  [key: string]: any;
+}
+
 export interface ImagesArray extends Array<ImageObject> {}

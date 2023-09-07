@@ -1,9 +1,9 @@
-import { ErrorResponse, Photos, PhotosWithTotalResults, createClient } from 'pexels';
-import { ImagesIds } from '../interfaces/pexels';
+import { Photos, createClient } from 'pexels';
 import { errorHandler } from '@helper/http-api/error-handler';
 import { ImageAPI } from '../interfaces/image.api';
-import { IResponseImages } from '../interfaces/response';
+import { IResponseWithImages } from '../interfaces/response';
 import { Photo } from 'pexels';
+import { Image } from '../interfaces/image';
 const apiKey = process.env.PEXELS_API_KEY;
 const client = createClient(apiKey!);
 
@@ -11,7 +11,7 @@ const client = createClient(apiKey!);
 // and 20,000 requests per month.
 
 export class PexelsService extends ImageAPI {
-  async getRandomImages(imagesNumber: number, pageNumber: number): Promise<IResponseImages> {
+  async getRandomImages(imagesNumber: number, pageNumber: number): Promise<IResponseWithImages> {
     try {
       const photos = (await client.photos.curated({ per_page: imagesNumber, page: pageNumber })) as Photos;
       const imageArray = photos.photos.map((photo) => {
@@ -26,7 +26,7 @@ export class PexelsService extends ImageAPI {
     }
   }
 
-  async searchImages(query: string, imagesNumber: number, pageNumber: number): Promise<IResponseImages> {
+  async searchImages(query: string, imagesNumber: number, pageNumber: number): Promise<IResponseWithImages> {
     try {
       const photos = (await client.photos.search({ query, per_page: imagesNumber, page: pageNumber })) as Photos;
       const imageArray = photos.photos.map((photo) => {
@@ -41,7 +41,7 @@ export class PexelsService extends ImageAPI {
     }
   }
 
-  async getFavoriteImages(imagesIds: string[]): Promise<Photo[]> {
+  async getFavoriteImages(imagesIds: string[]): Promise<Image[]> {
     try {
       return await Promise.all(
         imagesIds.map(async (imageID) => {

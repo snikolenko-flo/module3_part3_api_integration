@@ -1,10 +1,10 @@
 import { createResponse } from '@helper/http-api/response';
 import { APIGatewayProxyResult } from 'aws-lambda/trigger/api-gateway-proxy';
-import { GalleryService } from './gallery.service.js';
-import { Database } from '../interfaces/database.js';
-import { ImageAPI } from '../interfaces/image.api.js';
-import { Gallery } from '../interfaces/gallery.js';
-import { Photo } from 'pexels';
+import { GalleryService } from './gallery.service';
+import { Database } from '../interfaces/database';
+import { ImageAPI } from '../interfaces/image.api';
+import { Gallery } from '../interfaces/gallery';
+import { Image } from '../interfaces/image';
 import { uploadToS3 } from '../services/s3.service';
 import https from 'https';
 
@@ -36,11 +36,7 @@ export class GalleryManager extends Gallery {
 
   async searchGallery(
     apiService: ImageAPI,
-    user: string,
     pageNumber: number,
-    pageLimit: number,
-    dbService: Database,
-    currentUser: string,
     imageNumber: number,
     query: string
   ): Promise<APIGatewayProxyResult> {
@@ -48,7 +44,7 @@ export class GalleryManager extends Gallery {
     return createResponse(200, images);
   }
 
-  async updateDbUser(favoriteImages: Photo[], userEmail: string, dbService: Database): Promise<void> {
+  async updateDbUser(favoriteImages: Image[], userEmail: string, dbService: Database): Promise<void> {
     try {
       const imagesArray = await dbService.getImagesArray(userEmail);
 
@@ -82,7 +78,7 @@ export class GalleryManager extends Gallery {
     }
   }
 
-  async downloadAndUploadFiles(images: Photo[], s3Path: string, userEmail: string): Promise<void> {
+  async downloadAndUploadFiles(images: Image[], s3Path: string, userEmail: string): Promise<void> {
     try {
       await Promise.all(
         images.map(async (image) => {
