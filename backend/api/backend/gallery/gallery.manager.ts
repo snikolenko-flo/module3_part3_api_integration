@@ -22,12 +22,11 @@ export class GalleryManager extends Gallery {
     pageNumber: number,
     pageLimit: number,
     dbService: Database,
-    currentUser: string,
     imageNumber: number
   ): Promise<APIGatewayProxyResult> {
     let images;
     if (user) {
-      images = await this.service.getImages(pageNumber, pageLimit, dbService, currentUser, user);
+      images = await this.service.getImages(pageNumber, pageLimit, dbService, user);
     } else {
       images = await apiService.getRandomImages(imageNumber, pageNumber);
     }

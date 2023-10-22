@@ -41,11 +41,11 @@ export class PexelsService extends ImageAPI {
     }
   }
 
-  async getFavoriteImages(imagesIds: string[]): Promise<Image[]> {
+  getFavoriteImages(imagesIds: string[]): Promise<Image[]> {
     try {
-      return await Promise.all(
-        imagesIds.map(async (imageID) => {
-          return (await client.photos.show({ id: imageID })) as Photo;
+      return Promise.all(
+        imagesIds.map((imageID) => {
+          return client.photos.show({ id: imageID }) as any;
         })
       );
     } catch (e) {

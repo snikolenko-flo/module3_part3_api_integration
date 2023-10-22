@@ -9,7 +9,6 @@ export abstract class Gallery {
     pageNumber: number,
     pageLimit: number,
     dbService: Database,
-    currentUser: string,
     imageNumber: number
   ): Promise<APIGatewayProxyResult>;
 }

@@ -5,11 +5,9 @@ import { IResponseWithImages } from '../interfaces/response.js';
 import { Database } from '../interfaces/database.js';
 
 export class GalleryService {
-  async getFilesAmount(directory: string, counter?: number): Promise<number> {
+  async getFilesAmount(directory: string, counter: number = 0): Promise<number> {
     try {
       const dir = await opendir(directory);
-
-      counter = counter || 0;
 
       for await (const file of dir) {
         if (file.name.startsWith('.')) continue;
@@ -46,10 +44,9 @@ export class GalleryService {
     pageNumber: number,
     pageLimit: number,
     dbService: Database,
-    currentUser: string,
     user?: string
   ): Promise<IResponseWithImages> {
-    return await dbService.getImagesForUser(pageNumber, pageLimit, user);
+    return dbService.getImagesForUser(pageNumber, pageLimit, user);
   }
 
   async getNumberOfPages(limit: number, dbService: Database, user?: string): Promise<number> {
@@ -61,15 +58,9 @@ export class GalleryService {
     const total = await dbService.getNumberOfSharedImages();
     const totalPages = this.calculatePagesNumber(total);
 
-    if (limit) {
-      const pagesAmount = this.calculatePagesNumber(limit);
-      if (pagesAmount > totalPages) {
-        return totalPages;
-      } else {
-        return pagesAmount;
-      }
-    }
-    return totalPages;
+    if(!limit) return totalPages;
+    const pagesAmount = this.calculatePagesNumber(limit);
+    return pagesAmount > totalPages ? totalPages : pagesAmount;
   }
 
   getNumberOfPagesForUser(filesNumber: number): number {

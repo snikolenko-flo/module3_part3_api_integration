@@ -33,14 +33,10 @@ export const getGallery: APIGatewayProxyHandlerV2 = async (event) => {
     const pageLimit = parseInt(params!.limit!);
     const user = params!.filter;
 
-    const token = event['headers'].authorization;
-    const decodedToken = jwt.verify(token, secret);
-    const currentUser = decodedToken.user;
-
     if (isNaN(pageNumber)) return createResponse(400, { message: 'The page number should be an integer' });
     if (!isFinite(pageNumber)) return createResponse(400, { message: 'The page number should be a finite integer' });
 
-    return await manager.getGallery(apiService, user!, pageNumber, pageLimit, dbService, currentUser, imageNumber);
+    return await manager.getGallery(apiService, user!, pageNumber, pageLimit, dbService, imageNumber);
   } catch (e) {
     return errorHandler(e);
   }
@@ -73,15 +69,11 @@ export const searchImagesInAPI: APIGatewayProxyHandlerV2 = async (event) => {
     console.log(`pageLimit: ${pageLimit}`);
     console.log(`user: ${user}`);
 
-    const token = event['headers'].authorization;
-    const decodedToken = jwt.verify(token, secret);
-    const currentUser = decodedToken.user;
-
     if (isNaN(pageNumber)) return createResponse(400, { message: 'The page number should be an integer' });
     if (!isFinite(pageNumber)) return createResponse(400, { message: 'The page number should be a finite integer' });
 
     if (query === '') {
-      return await manager.getGallery(apiService, user!, pageNumber, pageLimit, dbService, currentUser, imageNumber);
+      return await manager.getGallery(apiService, user!, pageNumber, pageLimit, dbService, imageNumber);
     } else {
       return await manager.searchGallery(apiService, pageNumber, imageNumber, query);
     }
