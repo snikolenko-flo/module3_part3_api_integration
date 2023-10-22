@@ -198,7 +198,7 @@ export async function addImageToFavorites(event: Event): Promise<void> {
     },
   };
 
-  const url = `${BASE_URL}/add_to_favorites`;
+  const url = `${BASE_URL}/add-to-favorites`;
   try {
     const response = await fetch(url, options);
     if(response.ok) {

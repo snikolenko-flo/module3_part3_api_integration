@@ -55,7 +55,7 @@ export const getGalleryConfig: AWSPartitial = {
       events: [
         {
           httpApi: {
-            path: '/add_to_favorites',
+            path: '/add-to-favorites',
             method: 'post',
           },
         },
