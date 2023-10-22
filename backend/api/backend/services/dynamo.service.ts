@@ -14,9 +14,12 @@ import * as crypto from 'crypto';
 import { opendir, readFile } from 'fs/promises';
 import { FileService } from './file.service';
 import { uploadToS3 } from './s3.service';
+import { ImagesUrls } from '../interfaces/response';
+import { v4 as uuidv4 } from 'uuid';
 
-const dynamoTable = process.env.DYNAMO_TABLE;
-const awsRegion = process.env.AWS_REGION;
+const dynamoTable = process.env.DYNAMO_TABLE ? process.env.DYNAMO_TABLE : 'module3_part2';
+const awsRegion = process.env.AWS_REGION ? process.env.AWS_REGION : 'ap-northeast-1';
+
 const dynamoClient = new DynamoDBClient({ region: awsRegion });
 const fileService = new FileService();
 
@@ -38,7 +41,7 @@ export class DynamoDB extends Database {
     this.defaultLimit = 60;
     this.defaultLimit = 60;
     this.userSortValue = 'default';
-    this.client = dynamoClient;
+    this.client = dynamoClient ? dynamoClient : new DynamoDBClient({ region: 'ap-northeast-1' });
     this.table = dynamoTable ? dynamoTable : 'module3_part2';
     this.adminEmail = 'admin@flo.team';
     this.s3ImagesDirectory = 's3-bucket';
@@ -87,10 +90,12 @@ export class DynamoDB extends Database {
     const imageMetadata = this.file.getMetadata(buffer, this.imagesType);
     await uploadToS3(buffer, `${this.adminEmail}/${fileName}`, this.s3ImagesDirectory);
     return {
+      id: uuidv4(),
       filename: fileName,
       user: this.adminEmail,
       metadata: imageMetadata,
       date: new Date(),
+      subclipCreated: false,
     };
   }
 
@@ -152,6 +157,9 @@ export class DynamoDB extends Database {
   }
 
   async updateUserInDB(userEmail: string, arrayOfImages: ImagesArray): Promise<void> {
+    console.log(`Update user ${userEmail} with the array: `);
+    console.log(arrayOfImages);
+
     const params = {
       TableName: this.table,
       Key: {
@@ -165,13 +173,15 @@ export class DynamoDB extends Database {
     const client = new DynamoDBClient({});
     try {
       const command = new UpdateItemCommand(params);
-      client.send(command);
+      await client.send(command);
+      console.log(`User ${userEmail} was updated.`);
     } catch (e) {
       throw Error(`Error: ${e} function: updateUserInDB.`);
     }
   }
 
   async findUser(email: string): Promise<IUser> {
+    console.log(`Find user ${email} in the table ${this.table}, aws region is ${awsRegion}`);
     const params = {
       TableName: this.table,
       KeyConditionExpression: 'Email = :pk',
@@ -185,7 +195,6 @@ export class DynamoDB extends Database {
     try {
       const data = await this.client.send(queryCommand);
       const user = data.Items![0];
-
       return {
         email: user.Email.S!,
         password: user.Password.S!,
@@ -221,10 +230,8 @@ export class DynamoDB extends Database {
 
   async getNumberOfAllImages(user: string): Promise<number> {
     try {
-      const commonImages = await this.getCommonImages();
       const userImages = await this.getImagesForUserOnly(user);
-      const imagesArray = commonImages.concat(userImages);
-      return Number(imagesArray.length);
+      return Number(userImages.length);
     } catch (e) {
       throw Error(`Error: ${e} function: getNumberOfAllImages.`);
     }
@@ -385,11 +392,12 @@ export class DynamoDB extends Database {
     }
   }
 
-  private async createSingedUlrs(images: ImagesArray): Promise<string[]> {
+  private async createSingedUlrs(images: ImagesArray): Promise<ImagesUrls[]> {
     try {
       return await Promise.all(
         images.map(async (item) => {
-          return await this.createSignedUrl(`${item.user}/${item.filename}`);
+          const imageUrl = await this.createSignedUrl(`${item.user}/${item.filename}`);
+          return { url: imageUrl, id: item.id };
         })
       );
     } catch (e) {
@@ -397,20 +405,16 @@ export class DynamoDB extends Database {
     }
   }
 
-  async getImagesForUser(
-    page: number,
-    limit: number,
-    pagesAmount: number,
-    userEmail?: string
-  ): Promise<IResponseWithImages> {
+  async getImagesForUser(page: number, limit: number, userEmail?: string): Promise<IResponseWithImages> {
     try {
       const images = await this.getImagesForUserOnly(userEmail!, limit);
       const sortedImages = this.sortImagesFromOldToNew(images);
       const paths = this.getImagesPerPage(sortedImages, page, PER_PAGE);
       const signedImageUrls = await this.createSingedUlrs(paths);
+      const defaultImagesAmount = 1;
 
       return {
-        total: pagesAmount,
+        total: defaultImagesAmount,
         objects: signedImageUrls,
       };
     } catch (e) {

@@ -4,7 +4,7 @@ import { ImagesResponse } from '../interfaces/response';
 export class GalleryApi {
   async fetchImages(pageNumber: number, pageLimit: number, user?: string): Promise<ImagesResponse> {
     const accessToken = localStorage.getItem('token');
-
+    
     const defaultPage = 1;
 
     let url = `${BASE_URL}/gallery?page=${pageNumber}&limit=${pageLimit}`;

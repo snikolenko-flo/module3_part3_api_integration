@@ -35,5 +35,44 @@ export const getGalleryConfig: AWSPartitial = {
         },
       ],
     },
+    apiSearchImages: {
+      handler: 'api/backend/gallery/handler.searchImagesInAPI',
+      description: 'Returns a number of images that are on a backend',
+      timeout: 28,
+      events: [
+        {
+          httpApi: {
+            path: '/search',
+            method: 'post',
+          },
+        },
+      ],
+    },
+    apiAddToFavorites: {
+      handler: 'api/backend/gallery/handler.addImagesToFavorites',
+      description: 'Uploads images to s3',
+      timeout: 28,
+      events: [
+        {
+          httpApi: {
+            path: '/add-to-favorites',
+            method: 'post',
+          },
+        },
+      ],
+    },
+    cropImage: {
+      handler: 'api/backend/gallery/handler.cropImage',
+      description: 'Crop image from s3',
+      timeout: 28,
+      events: [
+        {
+          s3: {
+            bucket: 'stanislav-flo-test-bucket',
+            event: 's3:ObjectCreated:*',
+          },
+        },
+      ],
+    },
   },
 };

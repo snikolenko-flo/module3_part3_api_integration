@@ -8,7 +8,7 @@ export class LoginManager {
     try {
       return await dbService.findUser(email);
     } catch (e) {
-      throw { errorMessage: 'Could not get a user from database.', statusCode: 404 };
+      throw { errorMessage: e, statusCode: 404 };
     }
   }
 

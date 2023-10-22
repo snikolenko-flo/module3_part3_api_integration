@@ -1,21 +1,51 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import * as stream from 'stream';
 
-const bucketEndpoint = 'https://stanislav-flo-test-bucket.s3.ap-northeast-1.amazonaws.com';
-
-export const uploadToS3 = async (data: Buffer, filename: string, bucket: string): Promise<void> => {
-  const client = new S3Client({
-    forcePathStyle: true,
-    endpoint: bucketEndpoint,
-  });
-
-  client
-    .send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: filename,
-        Body: Buffer.from(data),
+export async function uploadToS3(data: Buffer, filename: string, bucket: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const client = new S3Client({ region: 'ap-northeast-1' });
+    console.log(`uploadToS3() | Upload the file ${filename} to the bucket ${bucket}`);
+    console.log(`uploadToS3() | bucket: ${bucket}`);
+    console.log(`uploadToS3() | filename: ${filename}`);
+    console.log('uploadToS3() | data');
+    console.log(data);
+    client
+      .send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: filename,
+          Body: data,
+        })
+      )
+      .then(() => {
+        console.log(`File ${filename} was uploaded to the bucket ${bucket}`);
+        resolve();
       })
-    )
-    .then(() => console.log(`File ${filename} is uploaded to the bucket ${bucket}`))
-    .catch((e) => console.log(`The error ${e} has happened`));
-};
+      .catch((e) => reject(`The error ${e} has happened`));
+  });
+}
+
+export async function downloadFromS3(key: string, bucket: string): Promise<Buffer> {
+  return new Promise(async (resolve) => {
+    console.log(`Dowload the file ${key}`);
+    const client = new S3Client({ region: 'ap-northeast-1' });
+    const getObjectCommand = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+    const response = await client.send(getObjectCommand);
+    const buffers: Buffer[] = [];
+    await new Promise<void>((resolve, reject) => {
+      const readableStream = stream.Readable.from(response.Body as NodeJS.ReadableStream);
+      readableStream.on('data', (chunk: Buffer) => {
+        buffers.push(chunk);
+      });
+      readableStream.on('end', () => resolve());
+      readableStream.on('error', reject);
+    });
+
+    const buffer = Buffer.concat(buffers);
+    console.log(`File ${key} is downloaded from the bucket ${bucket}`);
+    resolve(buffer);
+  });
+}

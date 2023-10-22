@@ -14,14 +14,9 @@ export abstract class Database {
     pagesAmount: number,
     currentUser: string
   ): Promise<IResponseWithImages>;
-  abstract getImagesForUser(
-    page: number,
-    limit: number,
-    pagesAmount: number,
-    userEmail?: string
-  ): Promise<IResponseWithImages>;
+  abstract getImagesForUser(page: number, limit: number, userEmail?: string): Promise<IResponseWithImages>;
   abstract getImagesArray(userEmail: string): Promise<ImagesArray>;
   abstract updateUserInDB(userEmail: string, arrayOfImages: ImagesArray): Promise<void>;
-  abstract addDefaultUsersToDB(usersArray: IUser[]): Promise<void>;
+  abstract addDefaultUsersToDB(userArray: IUser[]): Promise<void>;
   abstract addImagesDataToDB(directory: string): Promise<void>;
 }

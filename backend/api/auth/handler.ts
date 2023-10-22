@@ -10,7 +10,7 @@ const secret = process.env.SECRET;
 export const httpApiPolicy: APIGatewayTokenAuthorizerWithContextHandler<Record<string, any>> = async (event) => {
   log('httpApiPolicy authorizer is triggered');
   try {
-    const token = event['headers'].Authorization;
+    const token = event['headers'].authorization;
     if (token === 'null') {
       return UNAUTHORIZED;
     }
@@ -19,6 +19,7 @@ export const httpApiPolicy: APIGatewayTokenAuthorizerWithContextHandler<Record<s
       return UNAUTHORIZED;
     }
     if (token === 'error') {
+      log('token is error');
       return new Error('Internal server error');
     }
     return generatePolicy('user', 'Allow', '*', {});

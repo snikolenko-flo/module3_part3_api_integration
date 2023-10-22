@@ -1,5 +1,5 @@
 import { GalleryService } from './gallery.service.js';
-
+import { ImagesResponse } from '../interfaces/response.js';
 export class RenderGalleryHtml {
   galleryService: GalleryService;
 
@@ -7,12 +7,7 @@ export class RenderGalleryHtml {
     this.galleryService = new GalleryService();
   }
 
-  renderPagesList(totalNumberOfPages: number): void {
-    const pages = document.getElementById('pages');
-    pages.innerHTML = this.galleryService.wrapNumbersInHtml(totalNumberOfPages);
-  }
-
-  renderImages(imagesUrls: URL[]): void {
+  renderImages(imagesUrls: {url: string, id: number}[]): void {
     const images = document.getElementById('images');
     images.innerHTML = this.galleryService.wrapUrlsInHtml(imagesUrls);
   }

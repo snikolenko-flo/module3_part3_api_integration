@@ -5,11 +5,9 @@ import { IResponseWithImages } from '../interfaces/response.js';
 import { Database } from '../interfaces/database.js';
 
 export class GalleryService {
-  async getFilesAmount(directory: string, counter?: number): Promise<number> {
+  async getFilesAmount(directory: string, counter: number = 0): Promise<number> {
     try {
       const dir = await opendir(directory);
-
-      counter = counter || 0;
 
       for await (const file of dir) {
         if (file.name.startsWith('.')) continue;
@@ -45,18 +43,10 @@ export class GalleryService {
   async getImages(
     pageNumber: number,
     pageLimit: number,
-    pagesAmount: number,
     dbService: Database,
-    currentUser: string,
     user?: string
   ): Promise<IResponseWithImages> {
-    if (user) {
-      log(`Get images for the user ${user}.`);
-      return await dbService.getImagesForUser(pageNumber, pageLimit, pagesAmount, user);
-    } else {
-      log('Get all images.');
-      return await dbService.getImagesForOnePage(pageNumber, pageLimit, pagesAmount, currentUser);
-    }
+    return dbService.getImagesForUser(pageNumber, pageLimit, user);
   }
 
   async getNumberOfPages(limit: number, dbService: Database, user?: string): Promise<number> {
@@ -68,15 +58,9 @@ export class GalleryService {
     const total = await dbService.getNumberOfSharedImages();
     const totalPages = this.calculatePagesNumber(total);
 
-    if (limit) {
-      const pagesAmount = this.calculatePagesNumber(limit);
-      if (pagesAmount > totalPages) {
-        return totalPages;
-      } else {
-        return pagesAmount;
-      }
-    }
-    return totalPages;
+    if(!limit) return totalPages;
+    const pagesAmount = this.calculatePagesNumber(limit);
+    return pagesAmount > totalPages ? totalPages : pagesAmount;
   }
 
   getNumberOfPagesForUser(filesNumber: number): number {
